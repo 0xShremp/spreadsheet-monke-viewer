@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "serve": "http-server -P https://ordiscan.com --cors"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
