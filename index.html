@@ -211,19 +211,29 @@
         })
         .then((data) => {
           allHashlistData = data;
-          updateLoadingProgress("Loading special monke lists...");
+          updateLoadingProgress("Generating special monke lists...");
           
-          // Load special monke lists
-          return Promise.all([
-            fetch('./data/ninja-monkes.json').then(resp => resp.ok ? resp.json() : []),
-            fetch('./data/error-monkes.json').then(resp => resp.ok ? resp.json() : []),
-            fetch('./data/utility-monkes.json').then(resp => resp.ok ? resp.json() : [])
-          ]);
-        })
-        .then(([ninja, error, utility]) => {
-          ninjaMonkes = ninja;
-          errorMonkes = error;
-          utilityMonkes = utility;
+          // Generate special monke lists from hashlist data
+          ninjaMonkes = [];
+          errorMonkes = [];
+          utilityMonkes = [];
+          
+          data.forEach((monke, index) => {
+            const monkeNumber = index + 1;
+            if (monke.meta && monke.meta.attributes) {
+              monke.meta.attributes.forEach(attr => {
+                if (attr.trait_type === 'ninja' && attr.value === 'true') {
+                  ninjaMonkes.push(monkeNumber);
+                }
+                if (attr.trait_type === 'error' && attr.value !== 'false') {
+                  errorMonkes.push(monkeNumber);
+                }
+                if (attr.trait_type === 'utility' && attr.value === 'true') {
+                  utilityMonkes.push(monkeNumber);
+                }
+              });
+            }
+          });
           
           updateLoadingProgress("Setting up interface...");
           
@@ -326,6 +336,12 @@
         const select = document.getElementById(selectId);
         select.addEventListener("change", function () {
           if (select.value) {
+            // Clear other special selects
+            const otherSelects = ['ninja-select', 'error-select', 'utility-select'].filter(id => id !== selectId);
+            otherSelects.forEach(otherId => {
+              document.getElementById(otherId).value = '';
+            });
+            
             updateMonkeDisplay(Number(select.value));
           }
         });
